@@ -1,0 +1,3 @@
+{
+    "mongoURI": "mongodb+srv://MongoUser:MongoUser@firstcluster.lmatj.mongodb.net/dinder?retryWrites=true&w=majority"
+}
