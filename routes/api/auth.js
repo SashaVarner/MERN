@@ -1,10 +1,24 @@
 const express = require("express");
 const router = express.Router();
+const auth = require('../../middleware/auth');
+const User = require('../../models/User');
 
-//@route       GET api/users
+//@route       GET api/auth
 //@description Test route
 // @access     Public
-router.get("/", (req, res) => res.send("Auth route"));
+
+//you can add the auth as an extra parameter
+router.get("/", auth, async (req, res) => {
+    //We want to return info about the user
+
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 //We need to export the route
 module.exports = router;

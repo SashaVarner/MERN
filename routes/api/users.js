@@ -4,6 +4,7 @@ const gravatar = require("gravatar");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+//Required for the jsonwebtoken secret that I created
 const { check, validationResult } = require("express-validator");
 const normalize = require("normalize-url");
 
@@ -50,18 +51,18 @@ router.post(
       //Get users gravatar based on their email
 
       const avatar = gravatar.url(email, {
-        s: '200', //size
-        r: 'pg', //pg rating
-        d: 'mm'
-      })
+        s: "200", //size
+        r: "pg", //pg rating
+        d: "mm",
+      });
 
       //create an instance of a user
       user = new User({
         name,
         email,
         avatar,
-        password
-      })
+        password,
+      });
 
       //Encrypt password
       //This requires bcrypt
@@ -71,12 +72,26 @@ router.post(
 
       //saves it to the database!!!
       await user.save();
-   
 
-      // Return jsonwebtoken because in the frontend when a user registers we want them to be logged in right away and logins require the token
-      res.send("User registered");
-    } catch(err) {
+      const payload = {
+        user: {
+          id: user.id
+        }
+      };
+
+      //the payload includes the username and information about the user.
+      jwt.sign(
+        payload,
+        config.get("jwtSecret"),
+        { expiresIn: '5 days' },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
+
       //Server error
+    } catch (err) {
       console.error(err.message); //So we can see it in the console
       res.status(500).send("Server Error");
     }
